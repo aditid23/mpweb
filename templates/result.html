@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Linear Programming Solution</title>
+    <style>
+        /* General Reset */
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f6f9;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        h1, h2, h3 {
+            color: #2c3e50;
+            text-align: center;
+            margin-top: 20px;
+            font-weight: 700;
+        }
+
+        /* Container Styling */
+        .container {
+            max-width: 900px;
+            margin: 30px auto;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+            padding: 30px 40px;
+        }
+
+        /* Headings Styling */
+        h1 {
+            font-size: 36px;
+            letter-spacing: 1px;
+            color: #007bff;
+        }
+
+        h2 {
+            font-size: 28px;
+            color: #27ae60;
+        }
+
+        h3 {
+            font-size: 22px;
+            color: #2980b9;
+        }
+
+        /* Labels and Form Elements */
+        label {
+            font-size: 16px;
+            color: #34495e;
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        input, button {
+            width: 100%;
+            padding: 15px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            box-sizing: border-box;
+            background-color: #f9f9f9;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        input:focus, button:focus {
+            border-color: #007bff;
+            outline: none;
+            box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+        }
+
+        button {
+            background-color: #007bff;
+            color: white;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.3s;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+            transform: translateY(-3px);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        /* Error Message Styling */
+        .error-message {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            padding: 15px;
+            margin-top: 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            text-align: center;
+        }
+
+        /* List Styling */
+        ul {
+            list-style-type: none;
+            padding-left: 0;
+            margin-top: 20px;
+        }
+
+        ul li {
+            margin-bottom: 12px;
+            font-size: 16px;
+            color: #34495e;
+        }
+
+        /* Result Styling */
+        img {
+            display: block;
+            margin: 40px auto;
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+        }
+
+        a {
+            display: block;
+            text-align: center;
+            margin-top: 30px;
+            color: #007bff;
+            font-size: 16px;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                width: 90%;
+            }
+
+            label, input, button {
+                font-size: 14px;
+            }
+
+            button {
+                font-size: 14px;
+            }
+
+            h2, h3 {
+                font-size: 20px;
+            }
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Linear Programming Solution</h1>
+
+        {% if max_solution and min_solution %}
+            <h2>Optimal Solution</h2>
+            <p><strong>Maximum Value (Z) = {{ max_solution.1 }}</strong> at vertex <strong>({{ max_solution.0.0 }}, {{ max_solution.0.1 }})</strong></p>
+            <p><strong>Minimum Value (Z) = {{ min_solution.1 }}</strong> at vertex <strong>({{ min_solution.0.0 }}, {{ min_solution.0.1 }})</strong></p>
+
+            <h3>Feasible Region Vertices:</h3>
+            <ul>
+                {% for vertex in vertices %}
+                    <li>({{ vertex.0 }}, {{ vertex.1 }})</li>
+                {% endfor %}
+            </ul>
+
+            <h3>Graphical Representation:</h3>
+            <img src="data:image/png;base64,{{ img_data }}" alt="Graph of Feasible Region and Optimal Solutions">
+
+        {% else %}
+            <div class="error-message">
+                <p>No feasible solution found. Please check your input.</p>
+            </div>
+        {% endif %}
+
+        <a href="{% url 'index' %}">Go Back</a>
+    </div>
+</body>
+</html>
