@@ -19,7 +19,7 @@ SECRET_KEY = 'django-insecure-hqg2f$!te94jx7agqwo&&n*(rxj84jz9&aj#d3b1h0k-3l2ty_
 
 DEBUG = True
 
-ALLOWED_HOSTS = ['lpgraph.onrender.com','127.0.0.1']
+ALLOWED_HOSTS = ['lpgraphical.onrender.com','127.0.0.1']
 
 INSTALLED_APPS = [
     'django.contrib.admin',
