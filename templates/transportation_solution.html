@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transportation Problem Solution</title>
+    <style>
+        /* General styling for body and page elements */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #ffffff;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 2rem;
+            margin-bottom: 20px;
+        }
+
+        /* Container styling for the form */
+        form {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            width: 100%;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        /* Labels and input fields */
+        label {
+            font-size: 1rem;
+            margin-bottom: 5px;
+            display: block;
+            font-weight: bold;
+        }
+
+        input[type="number"] {
+            padding: 8px;
+            margin: 10px 0 20px 0;
+            width: 100%;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+
+        /* Submit button styling */
+        button[type="submit"] {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        button[type="submit"]:hover {
+            background-color: #45a049;
+        }
+
+        /* Error message styling */
+        .error-message {
+            color: red;
+            font-size: 1.1rem;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        /* Styling for sections and divs */
+        h2 {
+            font-size: 1.5rem;
+            margin-top: 20px;
+            font-weight: bold;
+        }
+
+        #cost_matrix_section,
+        #supply_section,
+        #demand_section {
+            margin-top: 20px;
+        }
+
+        #cost_matrix div,
+        #supply div,
+        #demand div {
+            margin-bottom: 10px;
+        }
+
+        /* Alert box styling */
+        .alert {
+            background-color: #ffcc00;
+            color: #fff;
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 8px;
+        }
+
+        /* Responsive grid layout */
+        .content-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .content-item {
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+        }
+
+        /* Additional Styling for Containers */
+        .container {
+            width: 100%;
+            max-width: 1300px;
+            margin: 0 auto;
+            padding: 15px;
+        }
+
+    </style>
+</head>
+<body>
+    <h1>Optimal Transportation Plan</h1>
+
+    {% if solution %}
+        <div class="container">
+            <h2>Solution Matrix</h2>
+            <table border="1" cellpadding="10">
+                <tr>
+                    <th>Source/Destination</th>
+                    {% for col in solution.0 %}
+                        <th>Destination {{ forloop.counter }}</th>
+                    {% endfor %}
+                </tr>
+                {% for row in solution %}
+                    <tr>
+                        <td>Source {{ forloop.counter }}</td>
+                        {% for val in row %}
+                            <td>{{ val }}</td>
+                        {% endfor %}
+                    </tr>
+                {% endfor %}
+            </table>
+
+            <h2>Total Cost: {{ total_cost }}</h2>
+        </div>
+    {% else %}
+        <div class="error-message">
+            <p>No solution found. Please check your inputs.</p>
+        </div>
+    {% endif %}
+
+    <a href="/">Go Back</a>
+</body>
+</html>

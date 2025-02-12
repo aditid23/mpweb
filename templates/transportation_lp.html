@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transportation Problem</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <style>
+        .container {
+            max-width: 1200px;
+        }
+
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .matrix-container {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .matrix-container div {
+            display: flex;
+            margin-bottom: 10px;
+        }
+
+        .matrix-container input {
+            width: 60px;
+            margin-right: 10px;
+            padding: 5px;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            font-size: 1.1rem;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        .error-message {
+            color: red;
+            font-size: 1.1rem;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .alert {
+            background-color: #ffcc00;
+            color: #fff;
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 8px;
+        }
+
+        .content-container {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+
+        .content-item {
+            width: 48%;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center mb-4">Transportation Problem</h1>
+
+        <form method="POST" action="{% url 'transport' %}">
+            {% csrf_token %}
+
+            <div class="form-group">
+                <label for="num_sources" class="form-label">Number of Sources</label>
+                <input type="number" name="num_sources" id="num_sources" class="form-control" value="{{ num_sources|default:'' }}" required>
+            </div>
+
+            <div class="form-group">
+                <label for="num_destinations" class="form-label">Number of Destinations</label>
+                <input type="number" name="num_destinations" id="num_destinations" class="form-control" value="{{ num_destinations|default:'' }}" required>
+            </div>
+
+            <div id="cost_matrix_section" {% if num_sources and num_destinations %}style="display:block;"{% else %}style="display:none;"{% endif %}>
+                <h2>Enter Cost Matrix</h2>
+                <div id="cost_matrix" class="matrix-container">
+                    {% for i in cost_matrix %}
+                        <div>
+                            {% for j in i %}
+                                <input type="number" name="cost_matrix_{{ forloop.parentloop.counter0 }}_{{ forloop.counter0 }}" value="{{ j }}" required>
+                            {% endfor %}
+                        </div>
+                    {% endfor %}
+                </div><br>
+            </div>
+
+            <div id="supply_section" {% if num_sources %}style="display:block;"{% else %}style="display:none;"{% endif %}>
+                <h2>Enter Supply for Each Source</h2>
+                <div id="supply" class="matrix-container">
+                    {% for s in supply %}
+                        <div>
+                            <label for="supply_{{ forloop.counter0 }}" class="form-label">Supply for Source {{ forloop.counter }}:</label>
+                            <input type="number" name="supply_{{ forloop.counter0 }}" value="{{ s }}" class="form-control" required>
+                        </div>
+                    {% endfor %}
+                </div><br>
+            </div>
+
+            <div id="demand_section" {% if num_destinations %}style="display:block;"{% else %}style="display:none;"{% endif %}>
+                <h2>Enter Demand for Each Destination</h2>
+                <div id="demand" class="matrix-container">
+                    {% for d in demand %}
+                        <div>
+                            <label for="demand_{{ forloop.counter0 }}" class="form-label">Demand for Destination {{ forloop.counter }}:</label>
+                            <input type="number" name="demand_{{ forloop.counter0 }}" value="{{ d }}" class="form-control" required>
+                        </div>
+                    {% endfor %}
+                </div><br>
+            </div>
+
+            <div class="text-center">
+                <button type="submit">Submit</button>
+            </div>
+        </form>
+
+        {% if error_message %}
+            <div class="error-message">
+                <p>{{ error_message }}</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <script>
+        const numSourcesInput = document.getElementById('num_sources');
+        const numDestinationsInput = document.getElementById('num_destinations');
+        const costMatrixSection = document.getElementById('cost_matrix_section');
+        const supplySection = document.getElementById('supply_section');
+        const demandSection = document.getElementById('demand_section');
+        const costMatrixDiv = document.getElementById('cost_matrix');
+        const supplyDiv = document.getElementById('supply');
+        const demandDiv = document.getElementById('demand');
+
+        numSourcesInput.addEventListener('change', renderCostMatrix);
+        numDestinationsInput.addEventListener('change', renderCostMatrix);
+
+        function renderCostMatrix() {
+            const numSources = parseInt(numSourcesInput.value);
+            const numDestinations = parseInt(numDestinationsInput.value);
+
+            if (numSources && numDestinations) {
+                costMatrixSection.style.display = 'block';
+                supplySection.style.display = 'block';
+                demandSection.style.display = 'block';
+                renderSupplySection(numSources);
+                renderDemandSection(numDestinations);
+                renderCostMatrixInputs(numSources, numDestinations);
+            } else {
+                costMatrixSection.style.display = 'none';
+                supplySection.style.display = 'none';
+                demandSection.style.display = 'none';
+            }
+        }
+
+        function renderCostMatrixInputs(numSources, numDestinations) {
+            costMatrixDiv.innerHTML = '';
+            for (let i = 0; i < numSources; i++) {
+                const row = document.createElement('div');
+                for (let j = 0; j < numDestinations; j++) {
+                    row.innerHTML += `<input type="number" name="cost_matrix_${i}_${j}" class="form-control" required>`;
+                }
+                costMatrixDiv.appendChild(row);
+            }
+        }
+
+        function renderSupplySection(numSources) {
+            supplyDiv.innerHTML = '';
+            for (let i = 0; i < numSources; i++) {
+                supplyDiv.innerHTML += `<div><label for="supply_${i}" class="form-label">Supply for Source ${i + 1}:</label>
+                                        <input type="number" name="supply_${i}" class="form-control" required><br></div>`;
+            }
+        }
+
+        function renderDemandSection(numDestinations) {
+            demandDiv.innerHTML = '';
+            for (let i = 0; i < numDestinations; i++) {
+                demandDiv.innerHTML += `<div><label for="demand_${i}" class="form-label">Demand for Destination ${i + 1}:</label>
+                                        <input type="number" name="demand_${i}" class="form-control" required><br></div>`;
+            }
+        }
+    </script>
+</body>
+</html>

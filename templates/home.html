@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home Page</title>
+    <style>
+        /* General Reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Body Styling */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #b4afaf;
+            color: #333;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            min-height: 100vh;
+            width: 100%;
+        }
+
+        /* Heading Styling */
+        h1 {
+            margin-bottom: 20px;
+            font-size: 2rem;
+            color: #333; /* Neutral black for the title */
+            text-align: center;
+            width: 100%;
+        }
+
+        /* Flexbox Container for Links */
+        .links-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 60px; /* Space between boxes */
+            width: 100%;
+            max-width: 960px; /* Limit the maximum width */
+        }
+
+        /* Box Styling for Links */
+        a {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 280px; /* Width of each box */
+            height: 280px; /* Height of each box */
+            margin: 10px 0; /* Vertical margin for the boxes */
+            text-align: center;
+            text-decoration: none;
+            color: #080808; /* White text inside the box */
+            background-color: #dddddd; /* Blue background for the box */
+            border-radius: 8px; /* Rounded corners */
+            font-size: 1.2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow for the box */
+            transition: all 0.3s ease; /* Smooth transition for hover effect */
+        }
+
+        /* Box Hover Effect */
+        a:hover {
+            background-color: #6e6f70; /* Darker blue on hover */
+            transform: translateY(-2px); /* Lift the box on hover */
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2); /* Stronger shadow on hover */
+        }
+    </style>
+</head>
+<body>
+    <h1>Welcome to the Mathematical Programming Website</h1>
+
+    <div class="links-container">
+        <a href="{% url 'mpweb' %}">Linear Programming Graphical Method</a>
+        <a href="{% url 'lpsimplex' %}">Linear Programming Simplex Method</a>
+        <a href="{% url 'transportation' %}">Transportation</a>
+    </div>
+</body>
+</html>
