@@ -221,59 +221,56 @@ def solve_lp(request):
     return render(request, "graphical_lp.html")
 
 
-# Simplex method implementation
-def simplex(c, A, b):
-    """
-    Solve a linear programming problem using the simplex method.
+def parse_objective_simplex(function_str):
+    terms = re.findall(r'([+-]?\d*)\s*([xyz])', function_str.replace(" ", ""))
+    coeffs = {'x': 0, 'y': 0, 'z': 0}
+    
+    for coeff, var in terms:
+        coeffs[var] = int(coeff) if coeff and coeff not in ['+', '-'] else int(coeff + '1')
+    
+    return [coeffs['x'], coeffs['y'], coeffs['z']]
 
-    Parameters:
-        c (np.array): Coefficients of the objective function.
-        A (np.array): Coefficient matrix of constraints.
-        b (np.array): Right-hand side values of constraints.
+def parse_equation_simplex(constraint_str):
+    parts = re.split(r'(<=|>=|=)', constraint_str.replace(" ", ""))
+    lhs, sign, rhs = parts[0], parts[1], int(parts[2])
+    coeffs = parse_objective_simplex(lhs)
+    return coeffs, sign, rhs
 
-    Returns:
-        solution (np.array): Optimal solution.
-        optimal_value (float): Optimal value of the objective function.
-    """
-    num_constraints, num_variables = A.shape
-
-    slack_vars = np.eye(num_constraints)
-    tableau = np.hstack((A, slack_vars, b.reshape(-1, 1)))
-
-    obj_row = np.hstack((-c, np.zeros(num_constraints + 1)))
-    tableau = np.vstack((tableau, obj_row))
-
-    num_total_vars = num_variables + num_constraints
-
-    while True:
-        if np.all(tableau[-1, :-1] >= 0):
-            break
-
+def simplex(obj_func, constraints):
+    num_vars = len(obj_func)
+    num_constraints = len(constraints)
+    
+    tableau = np.zeros((num_constraints + 1, num_vars + num_constraints + 1))
+    
+    # Populate objective function row
+    tableau[-1, :num_vars] = -np.array(obj_func)
+    
+    # Populate constraints
+    for i, (coeffs, _, rhs) in enumerate(constraints):
+        tableau[i, :num_vars] = coeffs
+        tableau[i, num_vars + i] = 1  # Slack variable
+        tableau[i, -1] = rhs
+    
+    # Simplex algorithm
+    while np.any(tableau[-1, :-1] < 0):
         pivot_col = np.argmin(tableau[-1, :-1])
-
         ratios = tableau[:-1, -1] / tableau[:-1, pivot_col]
-        ratios[ratios <= 0] = np.inf  
+        ratios[tableau[:-1, pivot_col] <= 0] = np.inf
         pivot_row = np.argmin(ratios)
-
-        if np.all(ratios == np.inf):
-            raise ValueError("The problem is unbounded.")
-
         pivot_element = tableau[pivot_row, pivot_col]
         tableau[pivot_row, :] /= pivot_element
-
-        for i in range(tableau.shape[0]):
+        
+        for i in range(len(tableau)):
             if i != pivot_row:
                 tableau[i, :] -= tableau[i, pivot_col] * tableau[pivot_row, :]
-
-    solution = np.zeros(num_total_vars)
-    for i in range(num_constraints):
-        basic_var_index = np.where(tableau[i, :-1] == 1)[0]
-        if len(basic_var_index) == 1 and basic_var_index[0] < num_total_vars:
-            solution[basic_var_index[0]] = tableau[i, -1]
-
-    optimal_value = tableau[-1, -1]
-    return solution[:num_variables], optimal_value
-
+    
+    solution = np.zeros(num_vars)
+    for i in range(num_vars):
+        col = tableau[:, i]
+        if np.count_nonzero(col[:-1]) == 1 and np.sum(col[:-1]) == 1:
+            solution[i] = tableau[np.where(col[:-1] == 1)[0][0], -1]
+    
+    return solution, tableau[-1, -1]  # Solution vector and optimal value
 
 def solve_simplex(request):
     if request.method == "POST":
@@ -282,34 +279,26 @@ def solve_simplex(request):
         constraints_input = request.POST.getlist("constraints[]")
 
         try:
-            c1, c2 = parse_objective(objective)
-            c = np.array([c1, c2])  
+            obj_coeffs = parse_objective_simplex(objective)
         except ValueError:
             return render(request, "simplex_lp.html", {"error_message": "Invalid objective function format."})
 
-        A = []
-        b = []
+        constraints = []
         for eq in constraints_input:
-            parsed = parse_equation(eq)
+            parsed = parse_equation_simplex(eq)
             if parsed:
-                a, b_coeff, c_val, op = parsed
+                coeffs, op, rhs = parsed
                 if op == "<=":
-                    A.append([a, b_coeff])
-                    b.append(c_val)
+                    constraints.append((coeffs, op, rhs))
                 elif op == ">=":
-                    A.append([-a, -b_coeff])  
-                    b.append(-c_val)
+                    constraints.append(([-c for c in coeffs], "<=", -rhs))  # Convert to <= format
                 else:
                     return render(request, "simplex_lp.html", {"error_message": "Equality constraints are not supported."})
             else:
                 return render(request, "simplex_lp.html", {"error_message": f"Invalid constraint: {eq}"})
 
-        A = np.array(A)
-        b = np.array(b)
-
         try:
-            solution, optimal_value = simplex(c, A, b)
-
+            solution, optimal_value = simplex(obj_coeffs, constraints)
             if mode == "minimize":
                 optimal_value = -optimal_value
 
@@ -331,6 +320,7 @@ def solve_simplex(request):
             return render(request, "simplex_lp.html", {"error_message": str(e)})
 
     return render(request, "simplex_lp.html")
+
 
 
 # Transportation problem solver

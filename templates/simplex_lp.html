@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title> Simplex Method</title>
+    <title>Simplex Method</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <style>
         .content-container {
@@ -22,7 +22,7 @@
         p {
             font-size: 1.25rem; 
         }
-        li{
+        li {
             font-size: 1.25rem;
         }
         .container {
@@ -33,20 +33,23 @@
 <body>
     <div class="container mt-5">
         <h1 class="text-center mb-4">Simplex Method Linear Programming Solver</h1>
+
         {% if error_message %}
         <div class="alert alert-danger" role="alert">
             {{ error_message }}
         </div>
         {% endif %}
+
         <form id="lp-form" method="POST" action="{% url 'solve_simplex' %}">
             {% csrf_token %}
             <div class="mb-3">
                 <label for="mode" class="form-label">Objective</label>
-                <select id="mode" name="mode" class="form-select" required aria-label="Select objective">
+                <select id="mode" name="mode" class="form-select" required>
                     <option value="maximize">Maximize</option>
                     <option value="minimize">Minimize</option>
                 </select>
             </div>
+
             <div class="mb-3">
                 <label for="objective" class="form-label">Objective Function</label>
                 <input 
@@ -54,12 +57,13 @@
                     id="objective" 
                     name="objective" 
                     class="form-control" 
-                    placeholder="e.g., 3x + 5y" 
-                    pattern="^[-+]?\d*x\s*[+-]\s*\d*y$" 
-                    title="Enter in the format: 3x + 5y" 
+                    placeholder="e.g., 3x + 5y + 2z" 
+                    pattern="^[-+]?\d*x\s*[+-]\s*\d*y(\s*[+-]\s*\d*z)?$" 
+                    title="Enter in the format: 3x + 5y (+ 2z)" 
                     required
                 >
             </div>
+
             <div id="constraints-container" class="mb-3">
                 <label class="form-label">Constraints</label>
                 <div class="input-group mb-2">
@@ -67,34 +71,36 @@
                         type="text" 
                         name="constraints[]" 
                         class="form-control" 
-                        placeholder="e.g., 2x + 3y <= 6" 
-                        pattern="^[-+]?\d*x\s*[+-]\s*\d*y\s*(<=|>=)\s*\d+$" 
-                        title="Enter in the format: 2x + 3y <= 6" 
+                        placeholder="e.g., 2x + 3y + 4z <= 6" 
+                        pattern="^[-+]?\d*x\s*[+-]\s*\d*y(\s*[+-]\s*\d*z)?\s*(<=|>=)\s*\d+$" 
+                        title="Enter in the format: 2x + 3y (+ 4z) <= 6" 
                         required
                     >
                     <button 
                         type="button" 
                         class="btn btn-danger" 
                         onclick="removeConstraint(this)" 
-                        aria-label="Remove this constraint"
                     >Remove</button>
                 </div>
             </div>
+
             <button 
                 type="button" 
                 class="btn btn-primary mb-3" 
-                onclick="addConstraint()" 
-                aria-label="Add a new constraint"
+                onclick="addConstraint()"
             >Add Constraint</button>
+
             <div class="text-center">
                 <button type="submit" class="btn btn-success">Solve</button>
             </div>
         </form>
+
         {% if solution %}
         <div class="mt-4">
             <h3>Objective Function</h3>
-            <p> {{ solution.mode_text }} z = {{ solution.objective_function }}</p>
+            <p>{{ solution.mode_text }} z = {{ solution.objective_function }}</p>
         </div>
+
         <div class="mt-5 content-container">
             <div class="content-item">
                 <h3>Constraints</h3>
@@ -105,26 +111,29 @@
                 </ul>
             </div>
         </div>
+
         <div class="mt-4">
             <h3>Optimal Solution</h3>
             {% if solution.optimal_point %}
-            <p>Optimal Point: ({{ solution.optimal_point.0 }}, {{ solution.optimal_point.1 }})</p>
+            <p>Optimal Point: ({{ solution.optimal_point|join:', ' }})</p>
             <p>Optimal Value: {{ solution.optimal_value }}</p>
             {% else %}
-            <p>No optimal solution found</p>
+            <p>No optimal solution found.</p>
             {% endif %}
         </div>
         {% endif %}
     </div>
+
     <script>
         function addConstraint() {
             const container = document.getElementById("constraints-container");
             const newConstraint = document.createElement("div");
             newConstraint.classList.add("input-group", "mb-2");
             newConstraint.innerHTML = `
-                <input type="text" name="constraints[]" class="form-control" placeholder="e.g., 2x + 3y <= 6" 
-                    pattern="^[-+]?\d*x\s*[+-]\s*\d*y\s*(<=|>=)\s*\d+$" title="Enter in the format: 2x + 3y <= 6" required>
-                <button type="button" class="btn btn-danger" onclick="removeConstraint(this)" aria-label="Remove this constraint">Remove</button>
+                <input type="text" name="constraints[]" class="form-control" placeholder="e.g., 2x + 3y + 4z <= 6" 
+                    pattern="^[-+]?\d*x\s*[+-]\s*\d*y(\s*[+-]\s*\d*z)?\s*(<=|>=)\s*\d+$" 
+                    title="Enter in the format: 2x + 3y (+ 4z) <= 6" required>
+                <button type="button" class="btn btn-danger" onclick="removeConstraint(this)">Remove</button>
             `;
             container.appendChild(newConstraint);
         }
@@ -133,6 +142,7 @@
             button.parentElement.remove();
         }
     </script>
+
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
 
